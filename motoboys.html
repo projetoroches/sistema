@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo · Painel do Motoboy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#600114;
+    --accent:#600114;
+    --success:#168B42;
+    --bg:#F5F5F5;
+    --surface:#FFFFFF;
+    --border:#E3E3E3;
+    --text:#201F1D;
+    --text-secondary:#6E6860;
+    --tint-brand:#F5E6E9;
+    --tint-brand-border:#E9C9D0;
+    --tint-green:#E8F5EC;
+    --tint-amber:#FDEFD6;
+    --neutral:#F0F0F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+  h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input{font-family:inherit;}
+  ::-webkit-scrollbar{height:0;width:0;}
+
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+
+  .center-page{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;}
+  .auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field span{font-size:13px;font-weight:600;}
+  .field input{border:1px solid var(--border);border-radius:12px;padding:13px 14px;font-size:14px;outline:none;background:var(--surface);width:100%;}
+  .btn-primary{display:block;width:100%;text-align:center;background:var(--brand);color:#fff;font-weight:700;font-size:15px;padding:15px;border-radius:12px;border:none;}
+  .btn-secondary{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-weight:600;font-size:13px;}
+  .muted{font-size:13px;color:var(--text-secondary);}
+  .demo-hint{background:var(--neutral);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--text-secondary);text-align:center;}
+  .warn-text{font-size:13px;color:#B91C1C;text-align:center;display:none;}
+  .warn-text.show{display:block;}
+
+  .brand-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:14px 20px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:10;}
+  @media (min-width:760px){.brand-header{padding:0 40px;height:72px;}}
+  .brand-header-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .header-right{display:flex;align-items:center;gap:20px;}
+
+  .content-max-narrow{max-width:900px;margin:0 auto;padding:24px 20px 64px 20px;}
+  @media (min-width:760px){.content-max-narrow{padding:28px 40px 64px 40px;}}
+
+  .section-label{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin:26px 0 12px 0;}
+  .section-label:first-child{margin-top:0;}
+
+  .delivery-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px;}
+  .delivery-card.done{opacity:0.6;}
+  .delivery-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .delivery-id{font-weight:700;font-size:16px;}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.coleta{background:var(--tint-amber);color:#9A6A00;}
+  .badge.caminho{background:var(--tint-brand);color:var(--brand);}
+  .badge.entregue{background:var(--tint-green);color:var(--success);}
+
+  .stop-block{display:flex;align-items:center;gap:14px;background:var(--neutral);border-radius:12px;padding:13px 16px;margin-bottom:10px;flex-wrap:wrap;}
+  .stop-icon{width:36px;height:36px;min-width:36px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;}
+  .stop-info{flex-grow:1;min-width:160px;}
+  .stop-name{font-weight:600;font-size:14px;}
+  .stop-addr{font-size:12.5px;color:var(--text-secondary);}
+
+  .stop-block.destino{background:var(--tint-brand);}
+
+  .action-row{display:flex;justify-content:flex-end;margin-top:14px;}
+  .btn-mini{padding:9px 16px;border-radius:999px;border:none;background:var(--brand);color:#fff;font-weight:600;font-size:13px;}
+  .btn-mini[disabled]{background:var(--neutral);color:var(--text-secondary);cursor:default;}
+  .check-ok{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--success);}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section class="screen active" id="screen-login">
+  <div class="center-page">
+    <div style="width:100%;max-width:420px;">
+      <div class="auth-card">
+        <div>
+          <h1 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">Painel do Motoboy</h1>
+          <p class="muted" style="margin:0;">Entre para ver suas entregas atribuídas.</p>
+        </div>
+
+        <label class="field"><span>Usuário</span><input id="login-user" type="text" placeholder="motoboy"></label>
+        <label class="field"><span>Senha</span><input type="password" placeholder="Digite sua senha (qualquer valor nesta demo)"></label>
+
+        <button class="btn-primary" onclick="handleLogin()">Entrar</button>
+
+        <div class="demo-hint">Demonstração: use o usuário <strong>motoboy</strong> — qualquer senha.</div>
+        <div class="warn-text" id="login-warn">Usuário não encontrado nesta demonstração. Use <strong>motoboy</strong>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section class="screen" id="screen-dashboard">
+  <div class="brand-header">
+    <div class="brand-header-left">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Painel do Motoboy</span>
+      <span style="opacity:0.85;font-size:14px;">Carlos Mendes</span>
+    </div>
+    <div class="header-right">
+      <a href="#" style="font-size:14px;font-weight:500;" onclick="showScreen('login');return false;">Sair</a>
+    </div>
+  </div>
+
+  <div class="content-max-narrow">
+    <div class="section-label">Entregas em andamento</div>
+    <div id="lista-ativas"></div>
+
+    <div class="section-label" id="label-concluidas" style="display:none;">Entregas concluídas</div>
+    <div id="lista-concluidas"></div>
+  </div>
+</section>
+
+<script>
+const svgStore = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#600114" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
+const svgHome = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#600114" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
+const svgCheck = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#168B42" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+const deliveries = [
+  {
+    id: '#1042',
+    status: 'coleta', // coleta -> caminho -> entregue
+    cliente: 'Glauber Silva',
+    destino: 'Rua das Flores, 123 · Apto 42 · Bairro Centro',
+    paradas: [
+      { loja: 'Tintas Colorama', endereco: 'Rua Industrial, 450 · Distrito Sul', coletado: false },
+      { loja: 'Autopeças Central', endereco: 'Av. Comercial, 210 · Centro', coletado: false },
+    ],
+  },
+  {
+    id: '#1045',
+    status: 'coleta',
+    cliente: 'Marina Alves',
+    destino: 'Av. Paulista, 900 · Sala 12',
+    paradas: [
+      { loja: 'Casa das Tintas', endereco: 'Rua das Palmeiras, 88 · Jardim Europa', coletado: false },
+    ],
+  },
+  {
+    id: '#1039',
+    status: 'entregue',
+    cliente: 'Fernanda Costa',
+    destino: 'Rua Sete de Setembro, 320',
+    paradas: [
+      { loja: 'Tintas Master', endereco: 'Av. Brasil, 1200', coletado: true },
+    ],
+  },
+];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function handleLogin() {
+  const raw = document.getElementById('login-user').value.trim().toLowerCase();
+  const warn = document.getElementById('login-warn');
+  if (raw === 'motoboy' || raw === '') {
+    warn.classList.remove('show');
+    showScreen('dashboard');
+    render();
+  } else {
+    warn.classList.add('show');
+  }
+}
+
+function badgeFor(status) {
+  if (status === 'coleta') return '<span class="badge coleta">Coletando itens</span>';
+  if (status === 'caminho') return '<span class="badge caminho">A caminho do cliente</span>';
+  return '<span class="badge entregue">Entregue</span>';
+}
+
+function toggleColeta(deliveryIdx, paradaIdx) {
+  deliveries[deliveryIdx].paradas[paradaIdx].coletado = true;
+  render();
+}
+
+function iniciarCorrida(deliveryIdx) {
+  deliveries[deliveryIdx].status = 'caminho';
+  render();
+}
+
+function concluirEntrega(deliveryIdx) {
+  deliveries[deliveryIdx].status = 'entregue';
+  render();
+}
+
+function renderDelivery(d, idx) {
+  const allColetados = d.paradas.every(p => p.coletado);
+  return `
+    <div class="delivery-card ${d.status === 'entregue' ? 'done' : ''}">
+      <div class="delivery-top">
+        <span class="delivery-id">Pedido ${d.id}</span>
+        ${badgeFor(d.status)}
+      </div>
+
+      ${d.paradas.map((p, pIdx) => `
+        <div class="stop-block">
+          <div class="stop-icon">${svgStore}</div>
+          <div class="stop-info">
+            <div class="stop-name">Retirar em: ${p.loja}</div>
+            <div class="stop-addr">${p.endereco}</div>
+          </div>
+          ${d.status === 'coleta'
+            ? (p.coletado
+                ? `<span class="check-ok">${svgCheck} Retirado</span>`
+                : `<button class="btn-mini" onclick="toggleColeta(${idx},${pIdx})">Marcar como retirado</button>`)
+            : `<span class="check-ok">${svgCheck} Retirado</span>`}
+        </div>
+      `).join('')}
+
+      <div class="stop-block destino">
+        <div class="stop-icon">${svgHome}</div>
+        <div class="stop-info">
+          <div class="stop-name">Entregar para: ${d.cliente}</div>
+          <div class="stop-addr">${d.destino}</div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        ${d.status === 'coleta'
+          ? `<button class="btn-mini" ${allColetados ? '' : 'disabled'} onclick="${allColetados ? `iniciarCorrida(${idx})` : ''}">Iniciar corrida até o cliente</button>`
+          : d.status === 'caminho'
+            ? `<button class="btn-mini" onclick="concluirEntrega(${idx})">Confirmar entrega</button>`
+            : ''}
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const ativas = deliveries.map((d, idx) => ({ d, idx })).filter(x => x.d.status !== 'entregue');
+  const concluidas = deliveries.map((d, idx) => ({ d, idx })).filter(x => x.d.status === 'entregue');
+
+  document.getElementById('lista-ativas').innerHTML = ativas.length
+    ? ativas.map(x => renderDelivery(x.d, x.idx)).join('')
+    : '<p class="muted">Nenhuma entrega em andamento no momento.</p>';
+
+  document.getElementById('label-concluidas').style.display = concluidas.length ? 'block' : 'none';
+  document.getElementById('lista-concluidas').innerHTML = concluidas.map(x => renderDelivery(x.d, x.idx)).join('');
+}
+
+render();
+</script>
+</body>
+</html>

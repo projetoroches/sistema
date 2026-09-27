@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo · Plataforma de Entregas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#600114;
+    --accent:#600114;
+    --success:#168B42;
+    --bg:#F5F5F5;
+    --surface:#FFFFFF;
+    --border:#E3E3E3;
+    --text:#201F1D;
+    --text-secondary:#6E6860;
+    --tint-brand:#F5E6E9;
+    --tint-brand-border:#E9C9D0;
+    --tint-green:#E8F5EC;
+    --neutral:#F0F0F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+  h1,h2,h3,.brand-font{font-family:'Space Grotesk',system-ui,sans-serif;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea{font-family:inherit;}
+  ::-webkit-scrollbar{height:0;width:0;}
+
+  /* ---- screens ---- */
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+
+  /* ---- shared bits ---- */
+  .center-page{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;}
+  .auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field span{font-size:13px;font-weight:600;}
+  .field input, .field textarea{border:1px solid var(--border);border-radius:12px;padding:13px 14px;font-size:14px;outline:none;background:var(--surface);width:100%;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:520px){.grid-2{grid-template-columns:1fr;}}
+  .btn-primary{display:block;width:100%;text-align:center;background:var(--brand);color:#fff;font-weight:700;font-size:15px;padding:15px;border-radius:12px;border:none;}
+  .btn-secondary{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-weight:600;font-size:13px;}
+  .muted{font-size:13px;color:var(--text-secondary);}
+  .muted-center{text-align:center;font-size:13px;color:var(--text-secondary);}
+  .link-strong{color:var(--brand);font-weight:600;}
+
+  .role-toggle{display:flex;background:var(--neutral);border-radius:12px;padding:4px;gap:4px;}
+  .role-toggle button{flex:1;border:none;border-radius:9px;padding:10px;font-size:14px;font-weight:600;background:transparent;color:var(--text-secondary);}
+  .role-toggle button.selected{background:var(--brand);color:#fff;}
+
+  .topbar{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+  @media (min-width:760px){.topbar{padding:0 40px;}}
+  .icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-width:36px;border-radius:999px;background:var(--neutral);border:none;}
+  .topbar-title{font-weight:700;font-size:17px;}
+  .topbar-sub{font-size:13px;color:var(--text-secondary);}
+
+  .brand-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:14px 20px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:10;}
+  @media (min-width:760px){.brand-header{padding:0 40px;height:72px;}}
+  .brand-header-left{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .location-btn{display:flex;align-items:center;gap:8px;background:transparent;border:none;color:#fff;font-family:inherit;font-size:14px;padding:8px 4px;}
+  .header-right{display:flex;align-items:center;gap:22px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:14px;font-family:'Space Grotesk',sans-serif;}
+
+  .content-max{max-width:1360px;margin:0 auto;padding:28px 20px 64px 20px;}
+  @media (min-width:760px){.content-max{padding:28px 40px 64px 40px;}}
+  .content-max-narrow{max-width:1100px;margin:0 auto;padding:28px 20px 64px 20px;}
+  @media (min-width:760px){.content-max-narrow{padding:32px 40px 64px 40px;}}
+
+  .search-box{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;max-width:520px;}
+  .search-box input{border:none;outline:none;font-size:15px;width:100%;color:var(--text);background:transparent;}
+
+  .chip-row{display:flex;gap:10px;overflow-x:auto;padding:22px 0 8px 0;}
+  .chip{display:inline-flex;align-items:center;padding:10px 18px;border-radius:999px;border:1px solid var(--border);font-size:14px;font-weight:500;white-space:nowrap;background:var(--surface);color:var(--text);flex-shrink:0;}
+  .chip.selected{border-color:var(--brand);background:var(--brand);color:#fff;font-weight:600;}
+
+  .store-grid{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:22px;margin-top:8px;}
+  @media (max-width:1100px){.store-grid{grid-template-columns:repeat(2, minmax(0,1fr));}}
+  @media (max-width:560px){.store-grid{grid-template-columns:1fr;}}
+  .store-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .store-card-banner{height:130px;display:flex;align-items:center;justify-content:center;}
+  .store-card-body{padding:16px;}
+  .store-card-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;margin-bottom:4px;}
+  .store-card-cat{font-size:13px;color:var(--text-secondary);}
+
+  .store-banner{height:170px;background:var(--tint-brand);display:flex;align-items:center;padding:0 20px;}
+  @media (min-width:760px){.store-banner{padding:0 40px;}}
+  .store-info{max-width:1360px;margin:0 auto;padding:22px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+  @media (min-width:760px){.store-info{padding:24px 40px;}}
+  .store-open-badge{display:flex;align-items:center;gap:8px;background:var(--tint-green);color:var(--success);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--success);}
+
+  .product-groups{max-width:1360px;margin:0 auto;padding:16px 20px 48px 20px;display:flex;flex-direction:column;gap:32px;}
+  @media (min-width:760px){.product-groups{padding:16px 40px 48px 40px;}}
+  .group-title-row{display:flex;align-items:center;gap:10px;margin:0 0 14px 0;}
+  .group-bar{width:4px;height:20px;border-radius:2px;background:var(--brand);}
+  .product-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:14px;}
+  @media (max-width:640px){.product-grid{grid-template-columns:1fr;}}
+  .product-card{display:flex;align-items:flex-start;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;}
+  .product-info{flex-grow:1;min-width:0;}
+  .product-name{font-weight:600;font-size:15px;margin-bottom:4px;}
+  .product-desc{font-size:13px;color:var(--text-secondary);line-height:1.4;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .product-price{font-weight:700;font-size:15px;color:var(--brand);}
+  .product-thumb-wrap{position:relative;width:92px;height:92px;min-width:92px;}
+  .product-thumb{width:92px;height:92px;border-radius:14px;background:var(--neutral);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .add-btn{position:absolute;right:-8px;bottom:-8px;width:32px;height:32px;border-radius:999px;border:2px solid #fff;background:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.18);}
+  .qty-pill{position:absolute;right:-8px;bottom:-10px;display:flex;align-items:center;gap:7px;background:var(--brand);border:2px solid #fff;border-radius:999px;padding:6px 8px;box-shadow:0 2px 6px rgba(0,0,0,0.18);}
+  .qty-pill button{width:16px;height:16px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;padding:0;}
+  .qty-pill span{font-weight:700;font-size:13px;color:#fff;min-width:12px;text-align:center;}
+
+  .cart-fab{position:fixed;left:0;right:0;bottom:20px;display:none;justify-content:center;z-index:20;padding:0 16px;}
+  .cart-fab.visible{display:flex;}
+  .cart-fab-inner{display:flex;align-items:center;gap:16px;background:var(--accent);color:#fff;padding:15px 26px;border-radius:999px;box-shadow:0 12px 28px rgba(0,0,0,0.18);border:none;max-width:100%;}
+
+  .two-col{max-width:1200px;margin:0 auto;padding:28px 20px;display:grid;grid-template-columns:1fr;gap:24px;align-items:start;}
+  @media (min-width:900px){.two-col{grid-template-columns:2fr 1fr;padding:32px 40px;gap:32px;}}
+
+  .cart-group{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .cart-store-label{display:flex;align-items:center;gap:10px;}
+  .cart-item-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;flex-wrap:wrap;}
+  .cart-item-thumb{width:52px;height:52px;min-width:52px;border-radius:10px;background:var(--neutral);display:flex;align-items:center;justify-content:center;}
+  .cart-item-info{flex-grow:1;min-width:120px;}
+  .stepper{display:flex;align-items:center;gap:12px;background:var(--neutral);border-radius:999px;padding:7px 12px;}
+  .stepper button{width:24px;height:24px;border-radius:999px;border:none;display:flex;align-items:center;justify-content:center;}
+  .stepper button.minus{background:#fff;}
+  .stepper button.plus{background:var(--brand);}
+  .stepper span{font-weight:600;min-width:14px;text-align:center;}
+  .line-total{width:84px;text-align:right;font-weight:700;font-size:15px;}
+  .remove-btn{background:transparent;border:none;color:#B0A99E;padding:4px;}
+  .store-fee-row{display:flex;justify-content:flex-end;gap:8px;font-size:13px;color:var(--text-secondary);padding:0 4px;}
+
+  .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;}
+  .summary-row{display:flex;justify-content:space-between;font-size:14px;color:var(--text-secondary);margin-bottom:10px;}
+  .summary-row.total{font-weight:700;font-size:18px;color:var(--text);margin-bottom:0;}
+  .summary-store-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;}
+  .hr{height:1px;background:var(--border);margin:14px 0;}
+  .addr-summary{display:flex;align-items:flex-start;gap:10px;background:var(--neutral);border-radius:12px;padding:14px;margin:18px 0;}
+
+  .addr-option{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;}
+  .addr-option.selected{background:var(--tint-brand);border-color:var(--brand);}
+  .addr-dot{width:18px;height:18px;min-width:18px;border-radius:999px;border:1.5px solid #C9C2B5;background:#fff;}
+  .addr-dot.selected{border:5px solid var(--brand);}
+
+  .info-box{display:flex;align-items:flex-start;gap:12px;background:var(--tint-brand);border:1px solid var(--tint-brand-border);border-radius:14px;padding:16px 18px;margin:24px 0;}
+
+  .stepper-status{display:flex;align-items:center;margin-top:18px;overflow-x:auto;}
+  .step-item{display:flex;align-items:center;flex-grow:1;min-width:80px;}
+  .step-col{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:78px;}
+  .step-circle{width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);background:#fff;}
+  .step-circle.done{background:var(--success);border-color:var(--success);}
+  .step-circle.active{background:var(--accent);border-color:var(--accent);}
+  .step-label{font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center;}
+  .step-label.active{font-weight:700;color:var(--text);}
+  .step-line{flex-grow:1;height:2px;background:var(--border);margin:0 4px 20px 4px;}
+  .step-line.done{background:var(--success);}
+
+  .map-box{height:230px;border-radius:16px;background:var(--tint-brand);position:relative;overflow:hidden;border:1px solid var(--border);margin:22px 0;}
+  .map-tag{position:absolute;background:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;}
+
+  .motoboy-card{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;flex-wrap:wrap;margin-bottom:22px;}
+  .motoboy-avatar{width:52px;height:52px;min-width:52px;border-radius:999px;background:var(--neutral);display:flex;align-items:center;justify-content:center;}
+
+  .order-items-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:24px;}
+  .order-store-label{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.03em;margin:14px 0 8px 0;}
+  .order-line{display:flex;justify-content:space-between;font-size:14px;color:#3A362F;}
+
+  .lojista-tabs{display:flex;gap:8px;padding:16px 20px 0 20px;}
+  @media (min-width:760px){.lojista-tabs{padding:20px 40px 0 40px;}}
+  .lojista-tab{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:14px;}
+  .lojista-tab.selected{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .lojista-product-card{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.preparo{background:#FDEFD6;color:#9A6A00;}
+  .badge.pronto{background:var(--tint-green);color:var(--success);}
+  .new-product-form{background:#fff;border:1px dashed var(--border);border-radius:14px;padding:18px;display:none;flex-direction:column;gap:12px;}
+  .new-product-form.open{display:flex;}
+  .demo-hint{background:var(--neutral);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--text-secondary);text-align:center;}
+  .warn-text{font-size:13px;color:#B91C1C;text-align:center;display:none;}
+  .warn-text.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section class="screen active" id="screen-login">
+  <div class="center-page">
+    <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:24px;">
+      <div class="auth-card">
+        <div>
+          <h1 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">Entrar</h1>
+          <p class="muted" style="margin:0;">Acesse sua conta para continuar.</p>
+        </div>
+
+        <div class="role-toggle">
+          <button id="tab-cliente" class="selected" onclick="setLoginRole('cliente')">Sou cliente</button>
+          <button id="tab-lojista" onclick="setLoginRole('lojista')">Sou lojista</button>
+        </div>
+
+        <label class="field">
+          <span>E-mail / usuário</span>
+          <input id="login-email" type="text" placeholder="cliente-final">
+        </label>
+
+        <label class="field">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Senha</span>
+            <a href="#" class="link-strong" style="font-size:12px;" onclick="return false;">Esqueceu sua senha?</a>
+          </div>
+          <input type="password" placeholder="Digite sua senha (qualquer valor nesta demo)">
+        </label>
+
+        <button class="btn-primary" onclick="handleLogin()">Entrar</button>
+
+        <div class="demo-hint">Demonstração: use o usuário <strong>cliente-final</strong> (área do cliente) ou <strong>lojista</strong> (área do lojista) — qualquer senha.</div>
+        <div class="warn-text" id="login-warn">Usuário não encontrado nesta demonstração. Use <strong>cliente-final</strong> ou <strong>lojista</strong>.</div>
+
+        <div id="login-link-cliente" class="muted-center">
+          Não tem conta? <a class="link-strong" href="#" onclick="showScreen('cadastro');return false;">Cadastre-se</a>
+        </div>
+        <div id="login-link-lojista" class="muted-center" style="display:none;">
+          Seu acesso é criado pelo administrador do sistema.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CADASTRO ===================== -->
+<section class="screen" id="screen-cadastro">
+  <div class="center-page">
+    <div style="width:100%;max-width:480px;">
+      <div class="auth-card">
+        <div>
+          <h1 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">Criar conta</h1>
+          <p class="muted" style="margin:0;">Cadastre-se para comprar em lojas parceiras.</p>
+        </div>
+
+        <label class="field"><span>Nome completo</span><input type="text" placeholder="Seu nome"></label>
+
+        <div class="grid-2">
+          <label class="field"><span>E-mail</span><input type="email" placeholder="seuemail@exemplo.com"></label>
+          <label class="field"><span>Telefone</span><input type="tel" placeholder="(00) 00000-0000"></label>
+        </div>
+
+        <label class="field"><span>Endereço de entrega</span><input type="text" placeholder="Rua, número"></label>
+
+        <div class="grid-2">
+          <label class="field"><span>Complemento</span><input type="text" placeholder="Apto, bloco (opcional)"></label>
+          <label class="field"><span>Bairro</span><input type="text" placeholder="Seu bairro"></label>
+        </div>
+
+        <div class="grid-2">
+          <label class="field"><span>Senha</span><input type="password" placeholder="Crie uma senha"></label>
+          <label class="field"><span>Confirmar senha</span><input type="password" placeholder="Repita a senha"></label>
+        </div>
+
+        <button class="btn-primary" onclick="showScreen('login')">Criar conta</button>
+
+        <div class="muted-center">Já tem conta? <a class="link-strong" href="#" onclick="showScreen('login');return false;">Entrar</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOME (lista de lojas) ===================== -->
+<section class="screen" id="screen-home">
+  <div class="brand-header">
+    <div class="brand-header-left">
+      <button class="location-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+        <span>Entregar em: <strong>Rua das Flores, 123</strong></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+    <div class="header-right">
+      <a href="#" onclick="showScreen('pedido');renderPedido();return false;" style="font-size:14px;font-weight:500;">Meus pedidos</a>
+      <div class="avatar" role="button" tabindex="0" title="Sair do sistema" style="cursor:pointer;" onclick="doLogoutCliente()">GS</div>
+    </div>
+  </div>
+
+  <div class="content-max">
+    <label class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E6860" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" placeholder="Buscar por autopeças, tintas...">
+    </label>
+
+    <div class="chip-row" id="category-chips"></div>
+    <div class="store-grid" id="store-grid"></div>
+  </div>
+</section>
+
+<!-- ===================== LOJA (produtos) ===================== -->
+<section class="screen" id="screen-loja">
+  <div class="topbar">
+    <button class="icon-btn" onclick="showScreen('home')" aria-label="Voltar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#201F1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </button>
+  </div>
+
+  <div class="store-banner">
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#600114" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+  </div>
+
+  <div class="store-info">
+    <div>
+      <h1 style="font-size:24px;font-weight:700;margin:0 0 6px 0;">Tintas Colorama</h1>
+      <div class="muted" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>Tintas</span><span>·</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#F2B84B" stroke="#F2B84B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>4.9</span><span>·</span><span>20-30 min</span><span>·</span><span>Entrega R$ 5,90</span>
+      </div>
+    </div>
+    <div class="store-open-badge"><span class="dot"></span>Loja aberta</div>
+  </div>
+
+  <div class="chip-row" style="max-width:1360px;margin:0 auto;padding-left:20px;padding-right:20px;">
+    <span class="chip selected">Todos</span>
+    <span class="chip">Tintas Imobiliárias</span>
+    <span class="chip">Vernizes</span>
+    <span class="chip">Acessórios</span>
+    <span class="chip">Ferramentas</span>
+  </div>
+
+  <div class="product-groups" id="product-groups"></div>
+
+  <div class="cart-fab" id="cart-fab">
+    <a href="#" onclick="showScreen('carrinho');renderCarrinho();return false;" class="cart-fab-inner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span style="font-weight:600;font-size:15px;" id="cart-fab-count">Ver carrinho · 0 itens</span>
+      <span style="font-weight:700;font-size:15px;" id="cart-fab-total">R$ 0,00</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===================== CARRINHO ===================== -->
+<section class="screen" id="screen-carrinho">
+  <div class="topbar">
+    <button class="icon-btn" onclick="showScreen('home')" aria-label="Voltar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#201F1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </button>
+    <div>
+      <div class="topbar-title">Seu carrinho</div>
+      <div class="topbar-sub" id="cart-store-count">0 lojas</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div id="cart-groups"></div>
+      <a href="#" onclick="showScreen('home');return false;" style="display:inline-flex;align-items:center;gap:8px;color:var(--brand);font-weight:600;font-size:14px;margin-top:4px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Continuar comprando
+      </a>
+    </div>
+
+    <div class="summary-card">
+      <h3 style="font-size:17px;font-weight:600;margin:0 0 16px 0;">Resumo do pedido</h3>
+      <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
+      <div class="summary-row"><span>Taxa de entrega</span><span id="cart-delivery">R$ 0,00</span></div>
+      <div class="hr"></div>
+      <div class="summary-row total"><span>Total</span><span id="cart-total">R$ 0,00</span></div>
+
+      <div class="addr-summary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E6860" stroke-width="1.8" style="margin-top:2px;"><path d="M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+        <div style="flex-grow:1;">
+          <div style="font-size:14px;font-weight:600;">Rua das Flores, 123</div>
+          <div class="muted">Apto 42 · Bairro Centro</div>
+        </div>
+        <button class="link-strong" style="background:transparent;border:none;font-size:13px;">Trocar</button>
+      </div>
+
+      <a href="#" class="btn-primary" style="background:var(--accent);" onclick="showScreen('checkout');renderCheckout();return false;">Finalizar pedido</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CHECKOUT ===================== -->
+<section class="screen" id="screen-checkout">
+  <div class="topbar">
+    <button class="icon-btn" onclick="showScreen('carrinho');renderCarrinho();" aria-label="Voltar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#201F1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </button>
+    <div class="topbar-title">Finalizar pedido</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;">Endereço de entrega</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="address-options"></div>
+
+      <div class="info-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-top:2px;min-width:20px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <div>
+          <div style="font-weight:600;font-size:14px;margin-bottom:2px;">Como funciona a partir daqui</div>
+          <div class="muted">Ao confirmar, cada loja do seu pedido recebe a notificação e começa a separar os itens. Você acompanha o status — de "Em preparação" até "Pronto para entrega" — na tela seguinte.</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;">Observações</h3>
+      <label class="field">
+        <textarea placeholder="Ex: interfone quebrado, deixar com o porteiro..." style="min-height:88px;resize:vertical;"></textarea>
+      </label>
+    </div>
+
+    <div class="summary-card">
+      <h3 style="font-size:17px;font-weight:600;margin:0 0 16px 0;" id="checkout-title">Seu pedido</h3>
+      <div id="checkout-store-lines"></div>
+      <div class="summary-row"><span>Subtotal</span><span id="checkout-subtotal">R$ 0,00</span></div>
+      <div class="summary-row" id="checkout-delivery-row"><span>Taxa de entrega</span><span id="checkout-delivery">R$ 0,00</span></div>
+      <div class="hr"></div>
+      <div class="summary-row total" style="margin-bottom:24px;"><span>Total</span><span id="checkout-total">R$ 0,00</span></div>
+
+      <a href="#" class="btn-primary" style="background:var(--accent);" onclick="confirmOrder();return false;">Confirmar pedido</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ACOMPANHAMENTO ===================== -->
+<section class="screen" id="screen-pedido">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="topbar-title" id="pedido-numero">Pedido #1042</span>
+      <span class="topbar-sub" id="pedido-lojas">2 lojas</span>
+    </div>
+    <a href="#" style="margin-left:auto;color:var(--brand);font-weight:600;font-size:14px;" onclick="showScreen('home');return false;">Voltar para o início</a>
+  </div>
+
+  <div class="content-max-narrow">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 28px;margin-bottom:22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:18px;font-weight:600;">Motoboy a caminho</span>
+        <span style="font-size:14px;color:var(--accent);font-weight:700;">Chega em ~18 min</span>
+      </div>
+      <div class="stepper-status" id="status-stepper"></div>
+    </div>
+
+    <div class="map-box">
+      <svg width="100%" height="100%" viewBox="0 0 800 260" preserveAspectRatio="none">
+        <path d="M100 210 C 200 70, 340 210, 440 90 S 620 40, 700 70" stroke="#600114" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round" fill="none"></path>
+        <circle cx="100" cy="210" r="8" fill="#600114"></circle>
+        <circle cx="440" cy="90" r="8" fill="#600114"></circle>
+        <circle cx="700" cy="70" r="9" fill="#600114"></circle>
+      </svg>
+      <div class="map-tag" style="left:20px;bottom:16px;" id="pedido-coletas">2 coletas</div>
+      <div class="map-tag" style="right:20px;top:16px;">Seu endereço</div>
+    </div>
+
+    <div class="motoboy-card">
+      <div class="motoboy-avatar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#600114" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path><path d="M12 17.5V14l-3-3 4-3 2 3h2"></path></svg>
+      </div>
+      <div style="flex-grow:1;">
+        <div style="font-weight:600;font-size:15px;">Carlos Mendes</div>
+        <div class="muted" id="motoboy-pickup">Retirando em: Tintas Colorama, Autopeças Central</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#F2B84B" stroke="#F2B84B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>4.9</span>
+      </div>
+      <button class="btn-secondary">Preciso de ajuda</button>
+    </div>
+
+    <div class="order-items-card">
+      <h3 style="font-size:16px;font-weight:600;margin:0 0 6px 0;">Itens do pedido</h3>
+      <div id="pedido-itens"></div>
+      <div class="hr"></div>
+      <div class="summary-row" id="pedido-delivery-row"><span>Taxa de entrega</span><span id="pedido-delivery">R$ 0,00</span></div>
+      <div class="summary-row total"><span>Total</span><span id="pedido-total">R$ 0,00</span></div>
+    </div>
+
+    <a href="#" class="btn-primary" onclick="showScreen('home');return false;">Fazer novo pedido</a>
+  </div>
+</section>
+
+<!-- ===================== LOJISTA ===================== -->
+<section class="screen" id="screen-lojista">
+  <div class="brand-header">
+    <div class="brand-header-left">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Painel do Lojista</span>
+      <span style="opacity:0.85;font-size:14px;">Tintas Colorama</span>
+    </div>
+    <div class="header-right">
+      <a href="#" style="font-size:14px;font-weight:500;" onclick="doLogout();return false;">Sair</a>
+    </div>
+  </div>
+
+  <div class="lojista-tabs">
+    <button class="lojista-tab selected" id="ltab-produtos" onclick="setLojistaTab('produtos')">Meus produtos</button>
+    <button class="lojista-tab" id="ltab-pedidos" onclick="setLojistaTab('pedidos')">Pedidos recebidos</button>
+  </div>
+
+  <div class="content-max-narrow">
+    <div id="lojista-produtos-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px 0;flex-wrap:wrap;gap:10px;">
+        <p class="muted" style="margin:0;">Cadastre seus itens com nome, descrição, valor e uma foto por item.</p>
+        <button class="btn-secondary" style="background:var(--brand);color:#fff;border-color:var(--brand);" onclick="toggleNewProductForm()">+ Novo produto</button>
+      </div>
+
+      <div class="new-product-form" id="new-product-form">
+        <div class="grid-2">
+          <label class="field"><span>Nome do produto</span><input id="np-nome" type="text" placeholder="Ex: Tinta Acrílica Fosca 18L"></label>
+          <label class="field"><span>Valor</span><input id="np-valor" type="text" placeholder="Ex: 149,90"></label>
+        </div>
+        <label class="field"><span>Descrição</span><input id="np-desc" type="text" placeholder="Ex: alto rendimento, secagem rápida"></label>
+        <label class="field"><span>Foto do produto</span><input id="np-foto" type="file" accept="image/*"></label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" style="width:auto;padding:12px 22px;" onclick="saveNewProduct()">Salvar produto</button>
+          <button class="btn-secondary" onclick="toggleNewProductForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;" id="lojista-product-list"></div>
+    </div>
+
+    <div id="lojista-pedidos-panel" style="display:none;">
+      <p class="muted" style="margin:8px 0 16px 0;">Separe os itens e, quando estiverem prontos, avise o sistema para que um motoboy seja designado.</p>
+      <div style="display:flex;flex-direction:column;gap:14px;" id="lojista-order-list"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* =====================================================
+   Estado global (em memória — sem localStorage)
+   ===================================================== */
+const productCatalog = [
+  { key:'branca',  store:'Tintas Colorama',   name:'Tinta Acrílica Fosca Branca 18L',      desc:'Alto rendimento, secagem rápida',      price:289.90, group:'Tintas Imobiliárias' },
+  { key:'premium', store:'Tintas Colorama',   name:'Tinta Acrílica Premium Cores 3,6L',    desc:'Acabamento fosco aveludado',           price:94.90,  group:'Tintas Imobiliárias' },
+  { key:'esmalte', store:'Tintas Colorama',   name:'Tinta Esmalte Sintético Brilhante 900ml', desc:'Alta cobertura e brilho',            price:39.90,  group:'Tintas Imobiliárias' },
+  { key:'massa',   store:'Tintas Colorama',   name:'Massa Corrida PVA 18L',                 desc:'Para acabamento interno',              price:79.90,  group:'Tintas Imobiliárias' },
+  { key:'verniz',  store:'Tintas Colorama',   name:'Verniz Marítimo Brilhante 3,6L',        desc:'Proteção UV para madeira',             price:119.90, group:'Vernizes e Impermeabilizantes' },
+  { key:'imperme', store:'Tintas Colorama',   name:'Impermeabilizante para Telhas 18L',     desc:'Vedação contra infiltração',           price:159.90, group:'Vernizes e Impermeabilizantes' },
+  { key:'selador', store:'Tintas Colorama',   name:'Selador Acrílico 18L',                  desc:'Base preparadora de parede',           price:69.90,  group:'Vernizes e Impermeabilizantes' },
+  { key:'rolo',    store:'Tintas Colorama',   name:'Kit Rolo de Lã 23cm',                   desc:'Rolo + bandeja + refil',               price:29.90,  group:'Acessórios para Pintura' },
+  { key:'fita',    store:'Tintas Colorama',   name:'Fita Crepe Profissional 48mm',          desc:'Alta aderência, fácil remoção',        price:12.90,  group:'Acessórios para Pintura' },
+  { key:'filtro',  store:'Autopeças Central', name:'Filtro de Óleo',                        desc:'Compatível com linha leve nacional',   price:18.50,  group:null },
+];
+const storeDeliveryFee = { 'Tintas Colorama': 5.90, 'Autopeças Central': 4.90 };
+const groupOrder = ['Tintas Imobiliárias', 'Vernizes e Impermeabilizantes', 'Acessórios para Pintura'];
+
+const allStores = [
+  { name: 'Autopeças Central',       category: 'Autopeças', rating: '4.8', time: '25-35 min', fee: 'R$ 4,90', tint: '#F5E6E9' },
+  { name: 'Tintas Colorama',         category: 'Tintas',    rating: '4.9', time: '20-30 min', fee: 'R$ 5,90', tint: '#E8F5EC' },
+  { name: 'Auto Center União',       category: 'Autopeças', rating: '4.6', time: '20-30 min', fee: 'R$ 4,50', tint: '#F0F0F0' },
+  { name: 'Casa das Tintas',         category: 'Tintas',    rating: '4.7', time: '30-40 min', fee: 'R$ 6,50', tint: '#F5E6E9' },
+  { name: 'Peças & Cia Autopeças',   category: 'Autopeças', rating: '4.5', time: '35-45 min', fee: 'R$ 6,90', tint: '#E8F5EC' },
+  { name: 'Tintas & Cores',          category: 'Tintas',    rating: '4.8', time: '25-35 min', fee: 'R$ 4,90', tint: '#F0F0F0' },
+  { name: 'Autopeças Rodovia',       category: 'Autopeças', rating: '4.4', time: '40-50 min', fee: 'R$ 7,90', tint: '#F5E6E9' },
+  { name: 'Tintas Master',           category: 'Tintas',    rating: '4.7', time: '20-30 min', fee: 'R$ 4,50', tint: '#E8F5EC' },
+];
+
+const state = {
+  loginRole: 'cliente',
+  selectedCategory: 'Todos',
+  cartQty: { premium: 1, rolo: 2, fita: 1, filtro: 1 },
+  address: 'casa',
+  lastOrder: null,
+  lojistaTab: 'produtos',
+  lojistaCustomProducts: [],
+  lojistaOrders: [
+    { id: '#1042', cliente: 'Glauber Silva', itens: ['1x Tinta Acrílica Premium Cores 3,6L', '2x Kit Rolo de Lã 23cm'], status: 'preparo' },
+    { id: '#1039', cliente: 'Marina Alves',  itens: ['1x Verniz Marítimo Brilhante 3,6L'],                              status: 'pronto' },
+  ],
+};
+
+const money = (n) => 'R$ ' + n.toFixed(2).replace('.', ',');
+const svgCheck = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+const svgBox = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#B5AEA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a4 4 0 0 1 8 0v2"></path></svg>';
+const svgStore = (color) => `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
+const svgStar = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#F2B84B" stroke="#F2B84B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+
+/* =====================================================
+   Navegação entre telas
+   ===================================================== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* =====================================================
+   Login
+   ===================================================== */
+function setLoginRole(role) {
+  state.loginRole = role;
+  document.getElementById('tab-cliente').classList.toggle('selected', role === 'cliente');
+  document.getElementById('tab-lojista').classList.toggle('selected', role === 'lojista');
+  document.getElementById('login-link-cliente').style.display = role === 'cliente' ? 'block' : 'none';
+  document.getElementById('login-link-lojista').style.display = role === 'lojista' ? 'block' : 'none';
+  document.getElementById('login-email').placeholder = role === 'cliente' ? 'cliente-final' : 'lojista';
+}
+
+function handleLogin() {
+  const raw = document.getElementById('login-email').value.trim().toLowerCase();
+  const warn = document.getElementById('login-warn');
+  warn.classList.remove('show');
+
+  if (raw === 'cliente-final') {
+    showScreen('home'); renderHome();
+  } else if (raw === 'lojista') {
+    showScreen('lojista'); renderLojista();
+  } else if (raw === '') {
+    // sem usuário digitado: usa a aba selecionada como atalho de demonstração
+    if (state.loginRole === 'cliente') { showScreen('home'); renderHome(); }
+    else { showScreen('lojista'); renderLojista(); }
+  } else {
+    warn.classList.add('show');
+  }
+}
+
+function doLogout() {
+  showScreen('login');
+}
+
+function doLogoutCliente() {
+  showScreen('login');
+}
+
+/* =====================================================
+   Home / lista de lojas
+   ===================================================== */
+function renderHome() {
+  const chipsEl = document.getElementById('category-chips');
+  const labels = ['Todos', 'Autopeças', 'Tintas'];
+  chipsEl.innerHTML = labels.map(l =>
+    `<span class="chip${l === state.selectedCategory ? ' selected' : ''}" onclick="selectCategory('${l}')">${l}</span>`
+  ).join('');
+
+  const gridEl = document.getElementById('store-grid');
+  const stores = state.selectedCategory === 'Todos' ? allStores : allStores.filter(s => s.category === state.selectedCategory);
+  gridEl.innerHTML = stores.map(s => `
+    <a class="store-card" href="#" onclick="showScreen('loja');renderLoja();return false;">
+      <div class="store-card-banner" style="background:${s.tint};">${svgStore('#600114')}</div>
+      <div class="store-card-body">
+        <div class="store-card-name">${s.name}</div>
+        <div class="store-card-cat">${s.category}</div>
+      </div>
+    </a>
+  `).join('');
+}
+function selectCategory(label) { state.selectedCategory = label; renderHome(); }
+
+/* =====================================================
+   Loja / produtos
+   ===================================================== */
+function setQty(key, delta) {
+  const next = Math.max(0, (state.cartQty[key] ?? 0) + delta);
+  state.cartQty[key] = next;
+  renderLoja();
+  if (document.getElementById('screen-carrinho').classList.contains('active')) renderCarrinho();
+}
+
+function renderLoja() {
+  const items = productCatalog.filter(p => p.store === 'Tintas Colorama').map(p => ({ ...p, qty: state.cartQty[p.key] ?? 0 }));
+  const groups = groupOrder.map(title => ({ title, items: items.filter(i => i.group === title) }));
+
+  const groupsEl = document.getElementById('product-groups');
+  groupsEl.innerHTML = groups.map(g => `
+    <div>
+      <div class="group-title-row"><span class="group-bar"></span><h2 style="font-size:18px;font-weight:700;margin:0;">${g.title}</h2></div>
+      <div class="product-grid">
+        ${g.items.map(item => `
+          <div class="product-card">
+            <div class="product-info">
+              <div class="product-name">${item.name}</div>
+              <div class="product-desc">${item.desc}</div>
+              <div class="product-price">${money(item.price)}</div>
+            </div>
+            <div class="product-thumb-wrap">
+              <div class="product-thumb">${svgBox}</div>
+              ${item.qty === 0 ? `
+                <button class="add-btn" aria-label="Adicionar" onclick="setQty('${item.key}',1)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>` : `
+                <div class="qty-pill">
+                  <button aria-label="Diminuir" onclick="setQty('${item.key}',-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                  <span>${item.qty}</span>
+                  <button aria-label="Aumentar" onclick="setQty('${item.key}',1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                </div>`}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  const cartCount = items.reduce((sum, i) => sum + i.qty, 0);
+  const cartTotal = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+  document.getElementById('cart-fab').classList.toggle('visible', cartCount > 0);
+  document.getElementById('cart-fab-count').textContent = `Ver carrinho · ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`;
+  document.getElementById('cart-fab-total').textContent = money(cartTotal);
+}
+
+/* =====================================================
+   Carrinho
+   ===================================================== */
+function buildCartGroups() {
+  const byStore = {};
+  productCatalog.forEach(p => {
+    const qty = state.cartQty[p.key] ?? 0;
+    if (qty <= 0) return;
+    if (!byStore[p.store]) byStore[p.store] = [];
+    byStore[p.store].push({ ...p, qty });
+  });
+  return Object.keys(byStore).map(storeName => {
+    const items = byStore[storeName];
+    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+    return { name: storeName, items, deliveryFee: storeDeliveryFee[storeName] ?? 0, subtotal };
+  });
+}
+
+function renderCarrinho() {
+  const groups = buildCartGroups();
+  document.getElementById('cart-store-count').textContent = groups.length === 0 ? 'Nenhuma loja selecionada' : groups.length === 1 ? '1 loja' : `${groups.length} lojas`;
+
+  const groupsEl = document.getElementById('cart-groups');
+  if (groups.length === 0) {
+    groupsEl.innerHTML = `<div style="padding:44px;text-align:center;color:var(--text-secondary);background:#fff;border:1px solid var(--border);border-radius:14px;">Seu carrinho está vazio.</div>`;
+  } else {
+    groupsEl.innerHTML = groups.map(g => `
+      <div class="cart-group">
+        <div class="cart-store-label">${svgStore('#600114')}<span style="font-weight:700;font-size:15px;">${g.name}</span></div>
+        ${g.items.map(item => `
+          <div class="cart-item-row">
+            <div class="cart-item-thumb">${svgBox}</div>
+            <div class="cart-item-info">
+              <div style="font-weight:600;font-size:15px;">${item.name}</div>
+              <div class="muted">${money(item.price)} / un.</div>
+            </div>
+            <div class="stepper">
+              <button class="minus" onclick="setQty('${item.key}',-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#201F1D" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+              <span>${item.qty}</span>
+              <button class="plus" onclick="setQty('${item.key}',1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+            </div>
+            <div class="line-total">${money(item.price * item.qty)}</div>
+            <button class="remove-btn" onclick="removeItem('${item.key}')" aria-label="Remover">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+            </button>
+          </div>
+        `).join('')}
+        <div class="store-fee-row"><span>Entrega desta loja</span><span style="font-weight:600;">${money(g.deliveryFee)}</span></div>
+      </div>
+    `).join('');
+  }
+
+  const subtotal = groups.reduce((s, g) => s + g.subtotal, 0);
+  const delivery = groups.reduce((s, g) => s + g.deliveryFee, 0);
+  document.getElementById('cart-subtotal').textContent = money(subtotal);
+  document.getElementById('cart-delivery').textContent = money(delivery);
+  document.getElementById('cart-total').textContent = money(subtotal + delivery);
+
+  renderLoja();
+}
+
+function removeItem(key) {
+  state.cartQty[key] = 0;
+  renderCarrinho();
+}
+
+/* =====================================================
+   Checkout
+   ===================================================== */
+function selectAddress(key) {
+  state.address = key;
+  renderCheckout();
+}
+
+function renderCheckout() {
+  const addressDefs = [
+    { key: 'casa', label: 'Casa', detail: 'Rua das Flores, 123 · Apto 42' },
+    { key: 'trabalho', label: 'Trabalho', detail: 'Av. Paulista, 900 · Sala 12' },
+  ];
+  document.getElementById('address-options').innerHTML = addressDefs.map(a => {
+    const sel = state.address === a.key;
+    return `
+      <button class="addr-option${sel ? ' selected' : ''}" onclick="selectAddress('${a.key}')">
+        <span class="addr-dot${sel ? ' selected' : ''}"></span>
+        <span style="flex-grow:1;text-align:left;">
+          <span style="display:block;font-weight:600;font-size:14px;">${a.label}</span>
+          <span style="display:block;font-size:13px;color:var(--text-secondary);">${a.detail}</span>
+        </span>
+      </button>`;
+  }).join('');
+
+  const groups = buildCartGroups();
+  document.getElementById('checkout-title').textContent = `Seu pedido · ${groups.length} ${groups.length === 1 ? 'loja' : 'lojas'}`;
+  document.getElementById('checkout-store-lines').innerHTML = groups.map(g => `
+    <div class="summary-store-row"><span style="color:var(--text-secondary);">${g.name}</span><span style="font-weight:600;">${money(g.subtotal)}</span></div>
+  `).join('') + '<div class="hr"></div>';
+
+  const subtotal = groups.reduce((s, g) => s + g.subtotal, 0);
+  const delivery = groups.reduce((s, g) => s + g.deliveryFee, 0);
+  document.getElementById('checkout-subtotal').textContent = money(subtotal);
+  document.getElementById('checkout-delivery-row').querySelector('span').textContent = `Taxa de entrega (${groups.length} ${groups.length === 1 ? 'loja' : 'lojas'})`;
+  document.getElementById('checkout-delivery').textContent = money(delivery);
+  document.getElementById('checkout-total').textContent = money(subtotal + delivery);
+}
+
+function confirmOrder() {
+  const groups = buildCartGroups();
+  const subtotal = groups.reduce((s, g) => s + g.subtotal, 0);
+  const delivery = groups.reduce((s, g) => s + g.deliveryFee, 0);
+  state.lastOrder = { groups, subtotal, delivery, total: subtotal + delivery };
+  showScreen('pedido');
+  renderPedido();
+}
+
+/* =====================================================
+   Acompanhamento do pedido
+   ===================================================== */
+function renderPedido() {
+  const order = state.lastOrder || {
+    groups: buildCartGroups(),
+    subtotal: 0, delivery: 0, total: 0,
+  };
+  if (!state.lastOrder) {
+    order.subtotal = order.groups.reduce((s, g) => s + g.subtotal, 0);
+    order.delivery = order.groups.reduce((s, g) => s + g.deliveryFee, 0);
+    order.total = order.subtotal + order.delivery;
+  }
+
+  const storeNames = order.groups.map(g => g.name);
+  document.getElementById('pedido-lojas').textContent = storeNames.length === 1 ? '1 loja' : `${storeNames.length} lojas`;
+  document.getElementById('pedido-coletas').textContent = storeNames.length === 1 ? '1 coleta' : `${storeNames.length} coletas`;
+  document.getElementById('motoboy-pickup').textContent = 'Retirando em: ' + (storeNames.join(', ') || '—');
+
+  document.getElementById('pedido-itens').innerHTML = order.groups.map(g => `
+    <div class="order-store-label">${g.name.toUpperCase()}</div>
+    ${g.items.map(i => `<div class="order-line"><span>${i.qty}x ${i.name}</span><span>${money(i.price * i.qty)}</span></div>`).join('')}
+  `).join('') || '<div class="muted">Nenhum item.</div>';
+
+  document.getElementById('pedido-delivery-row').querySelector('span').textContent = `Taxa de entrega (${storeNames.length || 0} ${storeNames.length === 1 ? 'loja' : 'lojas'})`;
+  document.getElementById('pedido-delivery').textContent = money(order.delivery);
+  document.getElementById('pedido-total').textContent = money(order.total);
+
+  const defs = [
+    { label: 'Confirmado', done: true },
+    { label: 'Em preparação', done: true },
+    { label: 'Pronto p/ entrega', done: true },
+    { label: 'A caminho', done: true, active: true },
+    { label: 'Entregue', done: false },
+  ];
+  document.getElementById('status-stepper').innerHTML = defs.map((s, idx) => `
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle ${s.active ? 'active' : (s.done ? 'done' : '')}">${s.done ? svgCheck : ''}</div>
+        <span class="step-label ${s.active ? 'active' : ''}">${s.label}</span>
+      </div>
+      ${idx < defs.length - 1 ? `<div class="step-line ${idx < 3 ? 'done' : ''}"></div>` : ''}
+    </div>
+  `).join('');
+}
+
+/* =====================================================
+   Lojista
+   ===================================================== */
+function setLojistaTab(tab) {
+  state.lojistaTab = tab;
+  document.getElementById('ltab-produtos').classList.toggle('selected', tab === 'produtos');
+  document.getElementById('ltab-pedidos').classList.toggle('selected', tab === 'pedidos');
+  document.getElementById('lojista-produtos-panel').style.display = tab === 'produtos' ? 'block' : 'none';
+  document.getElementById('lojista-pedidos-panel').style.display = tab === 'pedidos' ? 'block' : 'none';
+}
+
+function toggleNewProductForm() {
+  document.getElementById('new-product-form').classList.toggle('open');
+}
+
+function saveNewProduct() {
+  const nome = document.getElementById('np-nome').value.trim();
+  const valor = document.getElementById('np-valor').value.trim();
+  const desc = document.getElementById('np-desc').value.trim();
+  if (!nome || !valor) return;
+  state.lojistaCustomProducts.push({ nome, valor, desc });
+  document.getElementById('np-nome').value = '';
+  document.getElementById('np-valor').value = '';
+  document.getElementById('np-desc').value = '';
+  document.getElementById('np-foto').value = '';
+  document.getElementById('new-product-form').classList.remove('open');
+  renderLojista();
+}
+
+function toggleOrderStatus(idx) {
+  const order = state.lojistaOrders[idx];
+  if (order.status === 'preparo') order.status = 'pronto';
+  renderLojista();
+}
+
+function renderLojista() {
+  const catalogItems = productCatalog.filter(p => p.store === 'Tintas Colorama');
+  const listEl = document.getElementById('lojista-product-list');
+  listEl.innerHTML = catalogItems.map(p => `
+    <div class="lojista-product-card">
+      <div>
+        <div style="font-weight:600;font-size:15px;">${p.name}</div>
+        <div class="muted" style="margin:2px 0 6px 0;">${p.desc}</div>
+        <div class="product-price">${money(p.price)}</div>
+      </div>
+      <button class="btn-secondary">Editar</button>
+    </div>
+  `).join('') + state.lojistaCustomProducts.map(p => `
+    <div class="lojista-product-card">
+      <div>
+        <div style="font-weight:600;font-size:15px;">${p.nome}</div>
+        <div class="muted" style="margin:2px 0 6px 0;">${p.desc || 'Sem descrição'}</div>
+        <div class="product-price">R$ ${p.valor}</div>
+      </div>
+      <button class="btn-secondary">Editar</button>
+    </div>
+  `).join('');
+
+  const ordersEl = document.getElementById('lojista-order-list');
+  ordersEl.innerHTML = state.lojistaOrders.map((o, idx) => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:700;font-size:15px;">Pedido ${o.id}</div>
+          <div class="muted">Cliente: ${o.cliente}</div>
+        </div>
+        <span class="badge ${o.status}">${o.status === 'preparo' ? 'Em preparação' : 'Pronto para entrega'}</span>
+      </div>
+      <div style="font-size:14px;color:#3A362F;margin-bottom:${o.status === 'preparo' ? '12px' : '0'};">
+        ${o.itens.map(i => `<div>${i}</div>`).join('')}
+      </div>
+      ${o.status === 'preparo' ? `<button class="btn-primary" style="width:auto;padding:11px 20px;" onclick="toggleOrderStatus(${idx})">Marcar como pronto para entrega</button>` : ''}
+    </div>
+  `).join('');
+}
+
+/* =====================================================
+   Inicialização
+   ===================================================== */
+renderHome();
+renderLoja();
+renderCarrinho();
+renderLojista();
+</script>
+</body>
+</html>

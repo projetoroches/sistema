@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo · Painel Administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#600114;
+    --accent:#600114;
+    --success:#168B42;
+    --bg:#F5F5F5;
+    --surface:#FFFFFF;
+    --border:#E3E3E3;
+    --text:#201F1D;
+    --text-secondary:#6E6860;
+    --tint-brand:#F5E6E9;
+    --tint-brand-border:#E9C9D0;
+    --tint-green:#E8F5EC;
+    --tint-amber:#FDEFD6;
+    --neutral:#F0F0F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+  h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea,select{font-family:inherit;}
+  ::-webkit-scrollbar{height:0;width:0;}
+
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+
+  .center-page{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;}
+  .auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field span{font-size:13px;font-weight:600;}
+  .field input, .field select{border:1px solid var(--border);border-radius:12px;padding:13px 14px;font-size:14px;outline:none;background:var(--surface);width:100%;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:520px){.grid-2{grid-template-columns:1fr;}}
+  .btn-primary{display:block;width:100%;text-align:center;background:var(--brand);color:#fff;font-weight:700;font-size:15px;padding:15px;border-radius:12px;border:none;}
+  .btn-secondary{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-weight:600;font-size:13px;}
+  .muted{font-size:13px;color:var(--text-secondary);}
+  .demo-hint{background:var(--neutral);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--text-secondary);text-align:center;}
+  .warn-text{font-size:13px;color:#B91C1C;text-align:center;display:none;}
+  .warn-text.show{display:block;}
+
+  .brand-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:14px 20px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:10;}
+  @media (min-width:760px){.brand-header{padding:0 40px;height:72px;}}
+  .brand-header-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .header-right{display:flex;align-items:center;gap:20px;}
+
+  .tabs{display:flex;gap:8px;padding:16px 20px 0 20px;flex-wrap:wrap;}
+  @media (min-width:760px){.tabs{padding:20px 40px 0 40px;}}
+  .tab-btn{padding:10px 18px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:14px;}
+  .tab-btn.selected{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  .content-max-narrow{max-width:1100px;margin:0 auto;padding:24px 20px 64px 20px;}
+  @media (min-width:760px){.content-max-narrow{padding:28px 40px 64px 40px;}}
+
+  .panel-toolbar{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px 0;flex-wrap:wrap;gap:10px;}
+  .btn-add{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  .form-card{background:#fff;border:1px dashed var(--border);border-radius:14px;padding:18px;display:none;flex-direction:column;gap:12px;margin-bottom:18px;}
+  .form-card.open{display:flex;}
+
+  .list-card{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;flex-wrap:wrap;margin-bottom:12px;}
+  .list-card-main{display:flex;align-items:center;gap:14px;}
+  .list-avatar{width:44px;height:44px;min-width:44px;border-radius:999px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--brand);}
+  .list-card-name{font-weight:600;font-size:15px;}
+  .list-card-detail{font-size:13px;color:var(--text-secondary);}
+
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.disponivel{background:var(--tint-green);color:var(--success);}
+  .badge.entrega{background:var(--tint-amber);color:#9A6A00;}
+  .badge.aguardando{background:var(--tint-amber);color:#9A6A00;}
+  .badge.atribuido{background:var(--tint-green);color:var(--success);}
+
+  .order-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+  .order-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
+  .order-assign-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  .order-assign-row select{border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;min-width:200px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section class="screen active" id="screen-login">
+  <div class="center-page">
+    <div style="width:100%;max-width:420px;">
+      <div class="auth-card">
+        <div>
+          <h1 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">Painel Administrativo</h1>
+          <p class="muted" style="margin:0;">Acesso restrito ao administrador master.</p>
+        </div>
+
+        <label class="field"><span>Usuário</span><input id="login-user" type="text" placeholder="master"></label>
+        <label class="field"><span>Senha</span><input type="password" placeholder="Digite sua senha (qualquer valor nesta demo)"></label>
+
+        <button class="btn-primary" onclick="handleLogin()">Entrar</button>
+
+        <div class="demo-hint">Demonstração: use o usuário <strong>master</strong> — qualquer senha.</div>
+        <div class="warn-text" id="login-warn">Usuário não encontrado nesta demonstração. Use <strong>master</strong>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section class="screen" id="screen-dashboard">
+  <div class="brand-header">
+    <div class="brand-header-left">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Painel Administrativo</span>
+      <span style="opacity:0.85;font-size:14px;">master</span>
+    </div>
+    <div class="header-right">
+      <a href="#" style="font-size:14px;font-weight:500;" onclick="showScreen('login');return false;">Sair</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn selected" id="tab-atendentes" onclick="setTab('atendentes')">Atendentes</button>
+    <button class="tab-btn" id="tab-motoboys" onclick="setTab('motoboys')">Motoboys</button>
+    <button class="tab-btn" id="tab-pedidos" onclick="setTab('pedidos')">Pedidos para atribuir</button>
+  </div>
+
+  <div class="content-max-narrow">
+
+    <!-- ATENDENTES -->
+    <div id="panel-atendentes">
+      <div class="panel-toolbar">
+        <p class="muted" style="margin:0;">Atendentes acessam o ambiente admin para acompanhar pedidos e atribuir motoboys.</p>
+        <button class="btn-secondary btn-add" onclick="toggleForm('atendente')">+ Novo atendente</button>
+      </div>
+
+      <div class="form-card" id="form-atendente">
+        <div class="grid-2">
+          <label class="field"><span>Nome completo</span><input id="at-nome" type="text" placeholder="Ex: Ana Souza"></label>
+          <label class="field"><span>E-mail</span><input id="at-email" type="email" placeholder="ana.souza@empresa.com"></label>
+        </div>
+        <div class="grid-2">
+          <label class="field"><span>Telefone</span><input id="at-telefone" type="tel" placeholder="(00) 00000-0000"></label>
+          <label class="field"><span>Senha de acesso</span><input id="at-senha" type="password" placeholder="Definir senha inicial"></label>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" style="width:auto;padding:12px 22px;" onclick="saveAtendente()">Salvar atendente</button>
+          <button class="btn-secondary" onclick="toggleForm('atendente')">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="lista-atendentes"></div>
+    </div>
+
+    <!-- MOTOBOYS -->
+    <div id="panel-motoboys" style="display:none;">
+      <div class="panel-toolbar">
+        <p class="muted" style="margin:0;">Motoboys cadastrados recebem entregas atribuídas pelos atendentes.</p>
+        <button class="btn-secondary btn-add" onclick="toggleForm('motoboy')">+ Novo motoboy</button>
+      </div>
+
+      <div class="form-card" id="form-motoboy">
+        <div class="grid-2">
+          <label class="field"><span>Nome completo</span><input id="mb-nome" type="text" placeholder="Ex: Rafael Torres"></label>
+          <label class="field"><span>Telefone</span><input id="mb-telefone" type="tel" placeholder="(00) 00000-0000"></label>
+        </div>
+        <div class="grid-2">
+          <label class="field"><span>Placa da moto</span><input id="mb-placa" type="text" placeholder="Ex: ABC-1D23"></label>
+          <label class="field"><span>E-mail</span><input id="mb-email" type="email" placeholder="rafael@empresa.com"></label>
+        </div>
+        <label class="field"><span>Senha de acesso</span><input id="mb-senha" type="password" placeholder="Definir senha inicial"></label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" style="width:auto;padding:12px 22px;" onclick="saveMotoboy()">Salvar motoboy</button>
+          <button class="btn-secondary" onclick="toggleForm('motoboy')">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="lista-motoboys"></div>
+    </div>
+
+    <!-- PEDIDOS PARA ATRIBUIR -->
+    <div id="panel-pedidos" style="display:none;">
+      <p class="muted" style="margin:8px 0 16px 0;">Pedidos que já estão "Prontos para entrega" e aguardam um motoboy para a retirada.</p>
+      <div id="lista-pedidos"></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const state = {
+  tab: 'atendentes',
+  atendentes: [
+    { nome: 'Ana Souza',  email: 'ana.souza@roches.com.br',  telefone: '(11) 98888-1122' },
+    { nome: 'Pedro Lima', email: 'pedro.lima@roches.com.br', telefone: '(11) 97777-3344' },
+  ],
+  motoboys: [
+    { nome: 'Carlos Mendes', telefone: '(11) 96666-5566', placa: 'ABC-1D23', status: 'entrega' },
+    { nome: 'Rafael Torres', telefone: '(11) 95555-7788', placa: 'XYZ-9F45', status: 'disponivel' },
+    { nome: 'Diego Santos',  telefone: '(11) 94444-9900', placa: 'JKL-3G67', status: 'disponivel' },
+  ],
+  pedidos: [
+    { id: '#1042', lojas: ['Tintas Colorama', 'Autopeças Central'], cliente: 'Glauber Silva', endereco: 'Rua das Flores, 123 · Apto 42', atribuidoA: 'Carlos Mendes' },
+    { id: '#1045', lojas: ['Casa das Tintas'], cliente: 'Marina Alves', endereco: 'Av. Paulista, 900 · Sala 12', atribuidoA: null },
+    { id: '#1047', lojas: ['Auto Center União'], cliente: 'João Pereira', endereco: 'Rua Voluntários da Pátria, 55', atribuidoA: null },
+  ],
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function handleLogin() {
+  const raw = document.getElementById('login-user').value.trim().toLowerCase();
+  const warn = document.getElementById('login-warn');
+  if (raw === 'master' || raw === '') {
+    warn.classList.remove('show');
+    showScreen('dashboard');
+    renderAll();
+  } else {
+    warn.classList.add('show');
+  }
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  ['atendentes', 'motoboys', 'pedidos'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('selected', t === tab);
+    document.getElementById('panel-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function toggleForm(kind) {
+  document.getElementById('form-' + kind).classList.toggle('open');
+}
+
+function initials(name) {
+  return name.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
+}
+
+function saveAtendente() {
+  const nome = document.getElementById('at-nome').value.trim();
+  const email = document.getElementById('at-email').value.trim();
+  const telefone = document.getElementById('at-telefone').value.trim();
+  if (!nome || !email) return;
+  state.atendentes.push({ nome, email, telefone });
+  ['at-nome', 'at-email', 'at-telefone', 'at-senha'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-atendente').classList.remove('open');
+  renderAtendentes();
+}
+
+function saveMotoboy() {
+  const nome = document.getElementById('mb-nome').value.trim();
+  const telefone = document.getElementById('mb-telefone').value.trim();
+  const placa = document.getElementById('mb-placa').value.trim();
+  if (!nome || !telefone) return;
+  state.motoboys.push({ nome, telefone, placa, status: 'disponivel' });
+  ['mb-nome', 'mb-telefone', 'mb-placa', 'mb-email', 'mb-senha'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-motoboy').classList.remove('open');
+  renderMotoboys();
+}
+
+function renderAtendentes() {
+  document.getElementById('lista-atendentes').innerHTML = state.atendentes.map(a => `
+    <div class="list-card">
+      <div class="list-card-main">
+        <div class="list-avatar">${initials(a.nome)}</div>
+        <div>
+          <div class="list-card-name">${a.nome}</div>
+          <div class="list-card-detail">${a.email}${a.telefone ? ' · ' + a.telefone : ''}</div>
+        </div>
+      </div>
+      <button class="btn-secondary">Editar</button>
+    </div>
+  `).join('');
+}
+
+function renderMotoboys() {
+  document.getElementById('lista-motoboys').innerHTML = state.motoboys.map(m => `
+    <div class="list-card">
+      <div class="list-card-main">
+        <div class="list-avatar">${initials(m.nome)}</div>
+        <div>
+          <div class="list-card-name">${m.nome}</div>
+          <div class="list-card-detail">${m.telefone}${m.placa ? ' · Placa ' + m.placa : ''}</div>
+        </div>
+      </div>
+      <span class="badge ${m.status === 'disponivel' ? 'disponivel' : 'entrega'}">${m.status === 'disponivel' ? 'Disponível' : 'Em entrega'}</span>
+    </div>
+  `).join('');
+}
+
+function renderPedidos() {
+  document.getElementById('lista-pedidos').innerHTML = state.pedidos.map((p, idx) => `
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div style="font-weight:700;font-size:15px;">Pedido ${p.id}</div>
+          <div class="muted">Cliente: ${p.cliente} · Entrega em: ${p.endereco}</div>
+        </div>
+        ${p.atribuidoA ? `<span class="badge atribuido">Atribuído a ${p.atribuidoA}</span>` : `<span class="badge aguardando">Aguardando motoboy</span>`}
+      </div>
+      <div class="muted">Retirada em: ${p.lojas.join(', ')}</div>
+      ${!p.atribuidoA ? `
+        <div class="order-assign-row">
+          <select id="select-motoboy-${idx}">
+            ${state.motoboys.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('')}
+          </select>
+          <button class="btn-secondary btn-add" onclick="assignMotoboy(${idx})">Atribuir</button>
+        </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function assignMotoboy(idx) {
+  const select = document.getElementById('select-motoboy-' + idx);
+  state.pedidos[idx].atribuidoA = select.value;
+  renderPedidos();
+}
+
+function renderAll() {
+  renderAtendentes();
+  renderMotoboys();
+  renderPedidos();
+}
+</script>
+</body>
+</html>
